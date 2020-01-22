@@ -28,13 +28,18 @@ int mouse_move(int x, int y, void *param)
 
 	p = param;
 	ft_clear_buffer(&p->buffer);
-	printf("mouse %d %d\n", x,y);
+	printf("\nmouse x%d y%d\n", x,y);
 
 	t_line test;
-	test.start = VEC2(p->size.x/2, p->size.y/2);
+	// test.start = VEC2(-10, -10);
+	// test.start = VEC2(WIN_WIDTH + 10, WIN_HEIGHT + 10);
+	test.start = VEC2(WIN_WIDTH - x, WIN_HEIGHT - y);
 	test.end = VEC2(x, y);
-	ft_clip_line(&test);
-	ft_draw_line(p, test.start, test.end, 0xFFFFFF);
+	if (ft_clip_line(&test))
+		ft_draw_line(p, test.start, test.end, 0xFFFFFF);
+
+	printf("line start x%.0f y%.0f | end x%.0f y%.0f\n",
+		test.start.x, test.start.y, test.end.x, test.end.y);
 	mlx_put_image_to_window(p->mlx, p->win, p->buffer.ptr, 0, 0);
 	return (TRUE);
 }

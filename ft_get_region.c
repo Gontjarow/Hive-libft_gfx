@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_region.c                                       :+:      :+:    :+:   */
+/*   ft_get_region.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ngontjar <ngontjar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/21 21:31:38 by ngontjar          #+#    #+#             */
-/*   Updated: 2020/01/21 22:55:34 by ngontjar         ###   ########.fr       */
+/*   Updated: 2020/01/22 13:45:58 by ngontjar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ int	ft_get_region(t_xy point)
 	{
 		outcode |= OUTCODE_LEFT;
 	}
-	else if (point.x >= WIN_WIDTH)
+	else if (point.x > WIN_WIDTH)
 	{
 		outcode |= OUTCODE_RIGHT;
 	}
@@ -29,7 +29,7 @@ int	ft_get_region(t_xy point)
 	{
 		outcode |= OUTCODE_TOP;
 	}
-	else if (point.y >= WIN_HEIGHT)
+	else if (point.y > WIN_HEIGHT)
 	{
 		outcode |= OUTCODE_BOTTOM;
 	}
