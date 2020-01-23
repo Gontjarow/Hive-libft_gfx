@@ -6,7 +6,7 @@
 /*   By: ngontjar <ngontjar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/17 14:07:46 by ngontjar          #+#    #+#             */
-/*   Updated: 2020/01/21 22:55:42 by ngontjar         ###   ########.fr       */
+/*   Updated: 2020/01/23 21:52:53 by ngontjar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,15 @@
 # define WIN_WIDTH 500
 # define WIN_HEIGHT 500
 
+# define VEC3(a,b,c) (t_xyz){a, b, c}
 # define VEC2(a,b) (t_xy){a, b}
+
+typedef struct	s_xyz
+{
+	double x;
+	double y;
+	double z;
+}				t_xyz;
 
 typedef struct	s_xy
 {
@@ -46,6 +54,12 @@ typedef struct	s_line
 	t_xy start;
 	t_xy end;
 }				t_line;
+
+typedef struct	s_circle
+{
+	t_xy pos;
+	double r;
+}				t_circle;
 
 typedef struct	s_image
 {
@@ -86,9 +100,15 @@ enum			e_color
 void			ft_die(const char *error_message);
 double			ft_clamp(double input, double min, double max);
 int				ft_rgb_to_int(double r, double g, double b);
+int				ft_put_pixel(t_program *p, int x, int y, int color);
 int				ft_draw_line(t_program *p, t_xy start, t_xy end, int color);
 int				ft_clear_buffer(t_image *image);
 int				ft_clip_line(t_line *line);
+int				ft_draw_circle(t_program *p, t_circle *circle, int color);
+int				ft_draw_circle_empty(t_program *p, t_circle *circle, int color);
+int				ft_draw_circle_full(t_program *p, t_circle *circle, int color);
+
 int				ft_get_region(t_xy point);
+int				render(t_program *p);
 
 #endif
