@@ -42,19 +42,25 @@ int mouse_move(int x, int y, void *param)
 
 	// printf("line start x%.0f y%.0f | end x%.0f y%.0f\n",
 	// 	test.start.x, test.start.y, test.end.x, test.end.y);
-	t_circle circle;
-	circle.pos = VEC2(250, 250);
-	circle.r = 60;
 	printf("draw\n");
-	// ft_draw_circle(p, &circle, 0xFFFFFF);
-	// ft_draw_circle2(p, &circle, 0xFFFFFF);
-	// circle.r = 8;
-	// ft_draw_circle2(p, &circle, 0xFFFFFF);
-	// circle.r = 16;
-	// ft_draw_circle2(p, &circle, 0xFFFFFF);
-	// circle.r = 30;
-	// ft_draw_circle2(p, &circle, 0xFFFFFF);
-	ft_draw_circle_full(p, &circle, 0xFFA000);
+	// ft_draw_wall(100, 100);
+	ft_draw_line(p, VEC2(10, 10), VEC2(100, 100), 0x00FFFF);
+	ft_draw_wall(p, 100, 100, 0xFFFF00);
+	mlx_put_image_to_window(p->mlx, p->win, p->buffer.ptr, 0, 0);
+	return (TRUE);
+}
+
+int mouse_key(int key, int x, int y, void *param)
+{
+	t_program *p;
+	(void)key;
+	(void)x;
+	(void)y;
+
+	p = param;
+	printf("mouse_key draw\n");
+	ft_clear_buffer(&p->buffer);
+	ft_draw_wall(p, 100, 50, 0xFFFF00);
 	mlx_put_image_to_window(p->mlx, p->win, p->buffer.ptr, 0, 0);
 	return (TRUE);
 }
@@ -71,7 +77,8 @@ int main()
 
 	setup(&p, "test window");
 	printf("test done\n");
-	mlx_hook(p.win, EVENT_MOUSE_MOVE, 0, &mouse_move, &p);
+	mlx_mouse_hook(p.win, &mouse_key, &p);
+	// mlx_hook(p.win, EVENT_MOUSE_MOVE, 0, &mouse_move, &p);
 	mlx_hook(p.win, EVENT_CLOSE_WIN, 0, &window_close, &p);
 	mlx_loop(p.mlx);
 }

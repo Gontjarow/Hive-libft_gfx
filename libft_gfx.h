@@ -6,7 +6,7 @@
 /*   By: ngontjar <ngontjar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/17 14:07:46 by ngontjar          #+#    #+#             */
-/*   Updated: 2020/01/24 15:40:51 by ngontjar         ###   ########.fr       */
+/*   Updated: 2020/01/24 16:44:44 by ngontjar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,8 @@
 
 # define VEC3(a,b,c) (t_xyz){a, b, c}
 # define VEC2(a,b) (t_xy){a, b}
+# define RANGE(a,b) (t_range){a, b}
+# define LINE(a,b,c,d) (t_line){VEC2(a, b), VEC2(c, d)}
 
 typedef struct	s_xyz
 {
@@ -48,6 +50,12 @@ typedef struct	s_xy
 	double x;
 	double y;
 }				t_xy;
+
+typedef struct	s_range
+{
+	double begin;
+	double end;
+}				t_range;
 
 typedef struct	s_line
 {
@@ -98,10 +106,12 @@ enum			e_color
 };
 
 void			ft_die(const char *error_message);
+double			ft_map(double in, t_range from, t_range to);
 double			ft_clamp(double input, double min, double max);
 int				ft_rgb_to_int(double r, double g, double b);
 int				ft_put_pixel(t_program *p, int x, int y, int color);
 int				ft_draw_line(t_program *p, t_xy start, t_xy end, int color);
+int				ft_draw_wall(t_program *p, int x, double distance, int color);
 int				ft_clear_buffer(t_image *image);
 int				ft_clip_line(t_line *line);
 int				ft_draw_circle(t_program *p, t_circle *circle, int color);

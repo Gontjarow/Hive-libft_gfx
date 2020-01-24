@@ -6,14 +6,15 @@
 /*   By: ngontjar <ngontjar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/23 18:59:00 by ngontjar          #+#    #+#             */
-/*   Updated: 2020/01/24 15:40:53 by ngontjar         ###   ########.fr       */
+/*   Updated: 2020/01/24 15:49:03 by ngontjar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft_gfx.h"
 
 /*
-** Doesn't quite draw a perfect circle.
+** Doesn't quite draw a perfect circle,
+** floors towards 0?
 */
 
 int ft_draw_circle(t_program *p, t_circle *circle, int color)

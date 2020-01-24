@@ -6,7 +6,7 @@
 /*   By: ngontjar <ngontjar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/20 18:25:34 by ngontjar          #+#    #+#             */
-/*   Updated: 2020/01/23 21:07:43 by ngontjar         ###   ########.fr       */
+/*   Updated: 2020/01/24 17:35:20 by ngontjar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,15 +32,13 @@ int					ft_draw_line(t_program *p, t_xy start, t_xy end, int color)
 	ratio.y = (ratio.y > ratio.x) ? 1 : (ratio.y);
 	pos.x = start.x;
 	pos.y = start.y;
-	while (pixels--)
+	while (pixels-- > 0)
 	{
 		index = ((int)pos.y * p->buffer.line_bytes + pos.x);
-		if (index < 0 || index > WIN_WIDTH * WIN_HEIGHT)
-		{
+		if (index > 0 || index < WIN_WIDTH * WIN_HEIGHT)
+			p->buffer.data[index] = color;
+		else
 			printf("ignoring pixel %.0f %.0f (%d)\n", pos.x, pos.y, index);
-			continue;
-		}
-		p->buffer.data[index] = color;
 		pos.x += ratio.x * ((start.x < end.x) ? 1 : -1);
 		pos.y += ratio.y * ((start.y < end.y) ? 1 : -1);
 	}
