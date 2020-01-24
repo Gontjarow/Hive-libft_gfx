@@ -6,7 +6,7 @@
 /*   By: ngontjar <ngontjar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/17 14:07:46 by ngontjar          #+#    #+#             */
-/*   Updated: 2020/01/23 21:52:53 by ngontjar         ###   ########.fr       */
+/*   Updated: 2020/01/24 15:40:51 by ngontjar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,7 @@ int				ft_draw_line(t_program *p, t_xy start, t_xy end, int color);
 int				ft_clear_buffer(t_image *image);
 int				ft_clip_line(t_line *line);
 int				ft_draw_circle(t_program *p, t_circle *circle, int color);
-int				ft_draw_circle_empty(t_program *p, t_circle *circle, int color);
+int				ft_draw_ring(t_program *p, t_circle *circle, int color);
 int				ft_draw_circle_full(t_program *p, t_circle *circle, int color);
 
 int				ft_get_region(t_xy point);

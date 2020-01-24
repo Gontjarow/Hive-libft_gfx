@@ -6,7 +6,7 @@
 /*   By: ngontjar <ngontjar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/23 18:59:00 by ngontjar          #+#    #+#             */
-/*   Updated: 2020/01/23 21:55:20 by ngontjar         ###   ########.fr       */
+/*   Updated: 2020/01/24 15:40:53 by ngontjar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ int ft_draw_circle(t_program *p, t_circle *circle, int color)
 ** Misses one diagonal pixel when r isn't ^2
 */
 
-int ft_draw_circle_empty(t_program *prg, t_circle *circle, int color)
+int ft_draw_ring(t_program *prg, t_circle *circle, int color)
 {
 	t_xy p;
 	t_xyz delta;
@@ -84,7 +84,7 @@ int ft_draw_circle_full(t_program *prg, t_circle *circle, int color)
 	while (++i <= circle->r)
 	{
 		ring.r = i;
-		ft_draw_circle_empty(prg, &ring, color);
+		ft_draw_ring(prg, &ring, color);
 	}
 	return (TRUE);
 }
