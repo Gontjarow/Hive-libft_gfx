@@ -6,7 +6,7 @@
 /*   By: ngontjar <ngontjar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/21 18:44:51 by ngontjar          #+#    #+#             */
-/*   Updated: 2020/01/22 18:22:23 by ngontjar         ###   ########.fr       */
+/*   Updated: 2020/01/28 15:06:51 by ngontjar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,25 +30,29 @@
 ** Returns TRUE if there are pixels to draw.
 */
 
-static t_xy	new_point_vert(t_xy start, t_xy end, int outcode)
+static t_xy	new_point_vert(t_xy start, t_xy end, int outcode, t_clip *clip)
 {
 	t_xy out;
 
-	out.y = (outcode & OUTCODE_TOP ? 0 : WIN_HEIGHT - 1);
+	out.y = (outcode & OUTCODE_TOP ? clip->top : clip->bottom - 1);
 	out.x = (end.x - start.x);
-	out.x *= (outcode & OUTCODE_TOP ? (0 - start.y) : (WIN_HEIGHT - start.y));
+	out.x *= (outcode & OUTCODE_TOP ?
+		(clip->top - start.y) :
+		(clip->bottom - start.y));
 	out.x /= (end.y - start.y);
 	out.x += start.x;
 	return (out);
 }
 
-static t_xy	new_point_hori(t_xy start, t_xy end, int outcode)
+static t_xy	new_point_hori(t_xy start, t_xy end, int outcode, t_clip *clip)
 {
 	t_xy out;
 
-	out.x = (outcode & OUTCODE_LEFT ? 0 : WIN_WIDTH);
+	out.x = (outcode & OUTCODE_LEFT ? clip->left : clip->right);
 	out.y = (end.y - start.y);
-	out.y *= (outcode & OUTCODE_LEFT ? (0 - start.x) : (WIN_WIDTH - start.x));
+	out.y *= (outcode & OUTCODE_LEFT ?
+		(clip->left - start.x) :
+		(clip->right - start.x));
 	out.y /= (end.x - start.x);
 	out.y += start.y;
 	return (out);
@@ -70,21 +74,21 @@ static t_xy	new_point_hori(t_xy start, t_xy end, int outcode)
 **    Clip one end of the line before checking again.
 */
 
-static int	assign(t_xy *dest, t_xy point)
+static int	assign(t_xy *dest, t_xy point, t_clip *clip)
 {
 	*dest = point;
-	return (ft_get_region(point));
+	return (ft_get_region(point, clip));
 }
 
-int			ft_clip_line(t_line *line)
+int			ft_clip_line(t_line *line, t_clip *clip)
 {
 	int		outcode_start;
 	int		outcode_end;
 	int		outcode;
 	t_xy	point;
 
-	outcode_start = ft_get_region(line->start);
-	outcode_end = ft_get_region(line->end);
+	outcode_start = ft_get_region(line->start, clip);
+	outcode_end = ft_get_region(line->end, clip);
 	while (TRUE)
 	{
 		if (!(outcode_start | outcode_end))
@@ -93,13 +97,13 @@ int			ft_clip_line(t_line *line)
 			break ;
 		outcode = (outcode_start ? outcode_start : outcode_end);
 		if (outcode & (OUTCODE_TOP | OUTCODE_BOTTOM))
-			point = new_point_vert(line->start, line->end, outcode);
+			point = new_point_vert(line->start, line->end, outcode, clip);
 		else if (outcode & (OUTCODE_LEFT | OUTCODE_RIGHT))
-			point = new_point_hori(line->start, line->end, outcode);
+			point = new_point_hori(line->start, line->end, outcode, clip);
 		if (outcode == outcode_start)
-			outcode_start = assign(&line->start, point);
+			outcode_start = assign(&line->start, point, clip);
 		else
-			outcode_end = assign(&line->end, point);
+			outcode_end = assign(&line->end, point, clip);
 	}
 	return (!(outcode_start | outcode_end));
 }

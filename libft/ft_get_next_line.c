@@ -6,7 +6,7 @@
 /*   By: ngontjar <ngontjar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/10/24 11:43:39 by ngontjar          #+#    #+#             */
-/*   Updated: 2019/12/01 11:12:08 by ngontjar         ###   ########.fr       */
+/*   Updated: 2020/01/27 16:50:16 by ngontjar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ int			ft_get_next_line(const int fd, char **out)
 		if (file[fd] == NULL)
 			file[fd] = ft_strnew(0);
 		buffer[bytes] = '\0';
-		combined = ft_strjoin(file[fd], (bytes ? buffer : NULL));
+		combined = ft_strjoin(file[fd], buffer);
 		ft_strdel(&file[fd]);
 		file[fd] = combined;
 		if (ft_strchr(combined, '\n'))

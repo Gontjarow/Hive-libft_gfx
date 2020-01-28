@@ -1,6 +1,6 @@
 NAME = libft_gfx
 
-SOURCES = test.c ft_put_pixel.c ft_draw_line.c ft_draw_circle.c ft_draw_wall.c ft_rgb_to_int.c ft_clear_buffer.c ft_get_region.c ft_clip_line.c ft_clamp.c ft_map.c ft_die.c
+SOURCES = test.c ft_put_pixel.c ft_draw_line.c ft_draw_circle.c ft_draw_wall.c ft_draw_box.c ft_rgb_to_int.c ft_clear_buffer.c ft_get_region.c ft_clip_line.c ft_clamp.c ft_map.c ft_die.c
 
 OBJECTS = $(subst .c,.o,$(SOURCES))
 
