@@ -6,7 +6,7 @@
 /*   By: ngontjar <ngontjar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/17 14:07:46 by ngontjar          #+#    #+#             */
-/*   Updated: 2020/01/28 19:00:34 by ngontjar         ###   ########.fr       */
+/*   Updated: 2020/01/28 20:07:44 by ngontjar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,12 +33,15 @@
 # define WIN_WIDTH 500
 # define WIN_HEIGHT 500
 
+# define DEG_TO_RAD (0.01745329251994329576923690768488612)
+
 # define VEC3(x,y,z) (t_xyz){x, y, z}
 # define VEC2(x,y) (t_xy){x, y}
 # define RANGE(start,end) (t_range){start, end}
 # define LINE(Ax,Ay,Bx,By) (t_line){VEC2(Ax, Ay), VEC2(Bx, By)}
 # define CLIP(top,left,right,bottom) (t_clip){top,left,right,bottom}
 # define CIRCLE(pos,r) (t_circle){pos, r}
+
 typedef struct	s_xyz
 {
 	double x;

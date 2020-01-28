@@ -45,9 +45,9 @@ int mouse_move(int x, int y, void *param)
 	// 	test.start.x, test.start.y, test.end.x, test.end.y);
 	printf("draw\n");
 	// ft_draw_wall(100, 100);
-	ft_draw_line(p, VEC2(10, 10), VEC2(100, 100), 0x00FFFF);
-	ft_draw_wall(p, 100, 100, 0xFFFF00);
-	mlx_put_image_to_window(p->mlx, p->win, p->buffer.ptr, 0, 0);
+	// ft_draw_line(p, VEC2(10, 10), VEC2(100, 100), 0x00FFFF);
+	// ft_draw_wall(p, 100, 100, 0xFFFF00);
+	// mlx_put_image_to_window(p->mlx, p->win, p->buffer.ptr, 0, 0);
 	return (TRUE);
 }
 
@@ -70,36 +70,6 @@ static char	**parse_map(int fd)
 	map[y] = NULL;
 
 	return (map);
-}
-
-static void draw_top_view(t_program *p)
-{
-	int x, y;
-
-	y = 0;
-	while (y < 11)
-	{
-		x = 0;
-		while (p->map[y][x])
-		{
-			if (p->map[y][x] == ' ')
-				ft_draw_box(p, VEC2(x * 10, y * 10), VEC2(10, 10), 0x202020);
-			else
-				ft_draw_box(p, VEC2(x * 10, y * 10), VEC2(10, 10), 0xFFFFFF);
-			++x;
-		}
-		++y;
-	}
-	t_xy pos = p->plr.pos;
-	t_xy dir = p->plr.dir;
-	pos.x *= 10;
-	pos.y *= 10;
-	dir.x *= 20;
-	dir.y *= 20;
-	t_circle ring = CIRCLE(pos, 3);
-	t_line line = LINE(pos.x, pos.y, pos.x + dir.x, pos.y + dir.y);
-	ft_draw_ring(p, &ring, 0xFF0000);
-	ft_draw_line(p, line.start, line.end, 0xFFCC00);
 }
 
 static t_xy find_wall(char **map, t_xy pos, t_xy dir)
@@ -153,12 +123,15 @@ static t_xy find_wall(char **map, t_xy pos, t_xy dir)
 		clip.right = hori_bound;
 	}
 	ft_clip_line(&los, &clip);
-	printf("\n");
-	printf("dir.x %f, dir.y%f\n", dir.x, dir.y);
-	printf("clip mask: \n\t%f \n%f\t%f \n\t%f\n",
-		clip.top, clip.left, clip.right, clip.bottom);
-
-	return (spot);
+	// printf("\n");
+	// printf("dir.x %f, dir.y%f\n", dir.x, dir.y);
+	// printf("clip mask: \n\t%f \n%f\t%f \n\t%f\n",
+	// 	clip.top, clip.left, clip.right, clip.bottom);
+	printf("\t\t\t\t\t\t\t\tlos start %f %f end %f %f\n",
+		los.start.x, los.start.y, los.end.x, los.end.y);
+	printf("\t\t\t\t\t\t\t\treturning <%f %f>\n",
+		los.end.x - pos.x, los.end.y - pos.y);
+	return (VEC2(los.end.x - pos.x, los.end.y - pos.y));
 }
 
 static t_xy vec2_rot(t_xy v, double angle)
@@ -169,44 +142,71 @@ static t_xy vec2_rot(t_xy v, double angle)
 	});
 }
 
+static void draw_top_view(t_program *p, t_xy pos, t_xy dir)
+{
+	int x, y;
+
+	y = 0;
+	while (y < 11)
+	{
+		x = 0;
+		while (p->map[y][x])
+		{
+			if (p->map[y][x] == ' ')
+				ft_draw_box(p, VEC2(x * 10, y * 10), VEC2(10, 10), 0x202020);
+			else
+				ft_draw_box(p, VEC2(x * 10, y * 10), VEC2(10, 10), 0xFFFFFF);
+			++x;
+		}
+		++y;
+	}
+	pos.x *= 10;
+	pos.y *= 10;
+	dir.x *= 20;
+	dir.y *= 20;
+	t_circle ring = CIRCLE(pos, 3);
+	t_line line = LINE(pos.x, pos.y, pos.x + dir.x, pos.y + dir.y);
+	ft_draw_ring(p, &ring, 0xFF0000);
+	ft_draw_line(p, line.start, line.end, 0xFFCC00);
+}
+
 static void draw_view(t_program *p)
 {
-	static double	fov = -(90.0 / 2);
-	static double	angle = (90.0 / WIN_WIDTH) * (0.01745329251994329576923690768488612);
+	static double	angle = (45.0 / WIN_WIDTH) * DEG_TO_RAD;
 	t_xy			wall;
-	int				column;
+	double			column;
 	t_xy			idk;
 
 	printf("draw_view x%f y%f\n", idk.x, idk.y);
-	column = 0;
 
+	column = 0;
 	while (column < WIN_WIDTH)
 	{
-		// wall = find_wall(p->map, p->plr.pos, p->plr.dir);
-		t_xy test = vec2_rot(p->plr.dir, angle * column);
-		wall = find_wall(p->map, p->plr.pos, test);
-		printf("angle = %f, test = %f %f\n", angle, test.x, test.y);
-		// if (column < fov)
-		// else
-		// 	wall = find_wall(p->map, p->plr.pos,
-		// 		VEC2(p->plr.dir.x, idk.y * column));
+		t_xy angled;
+		if (column < WIN_WIDTH / 2.0)
+			angled = vec2_rot(p->plr.dir, column * -angle);
+		else
+			angled = vec2_rot(p->plr.dir, column * angle);
+		printf("col %.0f | angle %f, %f | vec2 x%f y%f\n",
+			column, angle, column * angle, angled.x, angled.y);
+
+		draw_top_view(p, p->plr.pos, p->plr.dir);
+		wall = find_wall(p->map, p->plr.pos, angled);
+		printf("\t\t\t\t\t\t\t\twall x%f y%f\n", wall.x, wall.y);
 
 		double magnitude = sqrt(wall.x * wall.x + wall.y * wall.y);
-		// printf("original length %f\n", magnitude);
 		magnitude = ft_map(magnitude, RANGE(0, 8), RANGE(0, 1));
-		// printf("length %f\n", 1 - magnitude);
-
 
 		if (column < WIN_WIDTH / 2)
 		{
 			if (idk.x < 0)
 			{
-				if (column % 5)
+				if (fmod(column, 5))
 					ft_draw_wall(p, column, 1 - magnitude, 0x800000);
 				else
 					ft_draw_wall(p, column, 1 - magnitude, 0x0);
 			}
-			else if (column % 5)
+			else if (fmod(column, 5))
 				ft_draw_wall(p, column, 1 - magnitude, 0xAA00AA);
 			else
 				ft_draw_wall(p, column, 1 - magnitude, 0x0);
@@ -215,12 +215,12 @@ static void draw_view(t_program *p)
 		{
 			if (idk.y < 0)
 			{
-				if (column % 5)
+				if (fmod(column, 5))
 					ft_draw_wall(p, column, 1 - magnitude, 0x800000);
 				else
 					ft_draw_wall(p, column, 1 - magnitude, 0x0);
 			}
-			else if (column % 5)
+			else if (fmod(column, 5))
 				ft_draw_wall(p, column, 1 - magnitude, 0x00AAAA);
 			else
 				ft_draw_wall(p, column, 1 - magnitude, 0x0);
@@ -241,7 +241,7 @@ int mouse_key(int key, int x, int y, void *param)
 	ft_clear_buffer(&p->buffer);
 	// ft_draw_wall(p, 100, 50, 0xFFFF00);
 	draw_view(p);
-	draw_top_view(p);
+	draw_top_view(p, p->plr.pos, p->plr.dir);
 	mlx_put_image_to_window(p->mlx, p->win, p->buffer.ptr, 0, 0);
 	return (TRUE);
 }
@@ -259,11 +259,11 @@ int main()
 	{
 		p.map = parse_map(fd);
 		printf("map_parse done\n");
-		p.plr.pos = VEC2(2.5, 2.5);
+		p.plr.pos = VEC2(5.5, 7.5);
 		// p.plr.dir = VEC2(0.894427, 0.447214);
 		// p.plr.dir = VEC2(0.910366, 0.413803);
-		p.plr.dir = VEC2(0, 1);
-		// p.plr.dir = VEC2(0.707107, -0.707107);
+		// p.plr.dir = VEC2(0, -1);
+		p.plr.dir = VEC2(0.707107, -0.707107);
 		// p.plr.dir = VEC2(-0.554700, 0.832050);
 	}
 
