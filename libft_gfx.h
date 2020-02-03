@@ -6,7 +6,7 @@
 /*   By: ngontjar <ngontjar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/17 14:07:46 by ngontjar          #+#    #+#             */
-/*   Updated: 2020/01/28 20:07:44 by ngontjar         ###   ########.fr       */
+/*   Updated: 2020/02/03 21:57:24 by ngontjar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,10 @@
 # define LINE(Ax,Ay,Bx,By) (t_line){VEC2(Ax, Ay), VEC2(Bx, By)}
 # define CLIP(top,left,right,bottom) (t_clip){top,left,right,bottom}
 # define CIRCLE(pos,r) (t_circle){pos, r}
+# define ARGB(a,r,g,b) ((t_argb){a, r, g, b})
+
+# define CHAR(a,n) (((a) << (n)) & 0xFF)
+# define COLOR(a,r,g,b) (CHAR(a,24) | CHAR(r,16) | CHAR(g,8) | b)
 
 typedef struct	s_xyz
 {
@@ -111,6 +115,14 @@ typedef struct	s_program
 	char		**map;
 }				t_program;
 
+typedef struct	t_argb
+{
+	unsigned char a;
+	unsigned char r;
+	unsigned char g;
+	unsigned char b;
+}				t_argb;
+
 enum			e_color
 {
 	black = 0x000000,
@@ -133,7 +145,12 @@ enum			e_color
 void			ft_die(const char *error_message);
 double			ft_map(double in, t_range from, t_range to);
 double			ft_clamp(double input, double min, double max);
+
+t_argb			new_argb(int color);
+int 			blend_argb(int fore, int back);
+
 int				ft_rgb_to_int(double r, double g, double b);
+int				ft_argb_to_int(double a, double r, double g, double b);
 
 int				ft_clear_buffer(t_image *image);
 

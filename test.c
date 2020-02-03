@@ -72,15 +72,38 @@ static char	**parse_map(int fd)
 	return (map);
 }
 
+static t_clip get_boundary(t_xy corner1, t_xy corner2)
+{
+	t_clip out;
+
+	if (corner1.y <= corner2.y)
+	{
+		out.top = corner1.y;
+		out.bottom = corner2.y;
+	}
+	else
+	{
+		out.top = corner2.y;
+		out.bottom = corner1.y;
+	}
+	if (corner1.x <= corner2.x)
+	{
+		out.left = corner1.x;
+		out.right = corner2.x;
+	}
+	else
+	{
+		out.left = corner2.x;
+		out.right = corner1.x;
+	}
+	return (out);
+}
+
 static t_xy find_wall(char **map, t_xy pos, t_xy dir)
 {
 	t_xy	length;
 	t_xy	ratio;
-	// t_xy wall;
-	// wall.x = (pos.x + dir.x * i.x) - ((int)pos.x - pos.x);
-	// wall.y = (pos.y + dir.y * i.y) - ((int)pos.y - pos.y);
-	// printf("\n");
-	// printf("pos %f %f | dir %f %f\n", pos.x, pos.y, dir.x, dir.y);
+
 	t_xy end = VEC2(pos.x + dir.x, pos.y + dir.y);
 
 	t_xy spot = pos;
@@ -101,36 +124,21 @@ static t_xy find_wall(char **map, t_xy pos, t_xy dir)
 	double vert_bound = (dir.x >= 0 ? floor(spot.x) : ceil(spot.x));
 	double hori_bound = (dir.y >= 0 ? floor(spot.y) : ceil(spot.y));
 	t_line los = LINE(pos.x, pos.y, spot.x, spot.y);
-	t_clip clip;
-	if (dir.y < 0)
-	{
-		clip.top = vert_bound;
-		clip.bottom = pos.y;
-	}
-	else
-	{
-		clip.top = pos.y;
-		clip.bottom = vert_bound;
-	}
-	if (dir.x < 0)
-	{
-		clip.left = hori_bound;
-		clip.right = pos.x;
-	}
-	else
-	{
-		clip.left = pos.x;
-		clip.right = hori_bound;
-	}
+	t_clip clip = get_boundary(pos, VEC2(hori_bound, vert_bound));
+	// printf("\nstart : %f %f\tend : %f %f \tindex : %d %d\nclip :\t%f\n%f\t%f\n\t%f\n",
+	// 	pos.x, pos.y, spot.x, spot.y, (int)spot.x, (int)spot.y,
+	// 	clip.top, clip.left, clip.right, clip.bottom);
 	ft_clip_line(&los, &clip);
 	// printf("\n");
 	// printf("dir.x %f, dir.y%f\n", dir.x, dir.y);
 	// printf("clip mask: \n\t%f \n%f\t%f \n\t%f\n",
 	// 	clip.top, clip.left, clip.right, clip.bottom);
-	printf("\t\t\t\t\t\t\t\tlos start %f %f end %f %f\n",
-		los.start.x, los.start.y, los.end.x, los.end.y);
-	printf("\t\t\t\t\t\t\t\treturning <%f %f>\n",
-		los.end.x - pos.x, los.end.y - pos.y);
+
+	// printf("\t\t\t\t\t\t\t\tlos start %f %f end %f %f\n",
+	// 	los.start.x, los.start.y, los.end.x, los.end.y);
+	// printf("\t\t\t\t\t\t\t\treturning <%f %f>\n",
+	// 	los.end.x - pos.x, los.end.y - pos.y);
+
 	return (VEC2(los.end.x - pos.x, los.end.y - pos.y));
 }
 
@@ -139,6 +147,17 @@ static t_xy vec2_rot(t_xy v, double angle)
 	return ((t_xy){
 		v.x * cos(angle) - v.y * sin(angle),
 		v.x * sin(angle) + v.y * cos(angle)
+	});
+}
+
+static t_xy	vec2_norm(t_xy v)
+{
+	double mag;
+
+	mag = sqrt((v.x * v.x) + (v.y * v.y));
+	return ((t_xy){
+		v.x / mag,
+		v.y / mag
 	});
 }
 
@@ -153,9 +172,9 @@ static void draw_top_view(t_program *p, t_xy pos, t_xy dir)
 		while (p->map[y][x])
 		{
 			if (p->map[y][x] == ' ')
-				ft_draw_box(p, VEC2(x * 10, y * 10), VEC2(10, 10), 0x202020);
+				ft_draw_box(p, VEC2(x * 10, y * 10), VEC2(10, 10), 0xC0202020);
 			else
-				ft_draw_box(p, VEC2(x * 10, y * 10), VEC2(10, 10), 0xFFFFFF);
+				ft_draw_box(p, VEC2(x * 10, y * 10), VEC2(10, 10), 0xC0FFFFFF);
 			++x;
 		}
 		++y;
@@ -166,7 +185,9 @@ static void draw_top_view(t_program *p, t_xy pos, t_xy dir)
 	dir.y *= 20;
 	t_circle ring = CIRCLE(pos, 3);
 	t_line line = LINE(pos.x, pos.y, pos.x + dir.x, pos.y + dir.y);
+	printf("\nring\n");
 	ft_draw_ring(p, &ring, 0xFF0000);
+	printf("\nline\n");
 	ft_draw_line(p, line.start, line.end, 0xFFCC00);
 }
 
@@ -183,16 +204,20 @@ static void draw_view(t_program *p)
 	while (column < WIN_WIDTH)
 	{
 		t_xy angled;
-		if (column < WIN_WIDTH / 2.0)
-			angled = vec2_rot(p->plr.dir, column * -angle);
-		else
-			angled = vec2_rot(p->plr.dir, column * angle);
-		printf("col %.0f | angle %f, %f | vec2 x%f y%f\n",
-			column, angle, column * angle, angled.x, angled.y);
 
-		draw_top_view(p, p->plr.pos, p->plr.dir);
+		if (column < WIN_WIDTH / 2.0)
+			angled = vec2_norm(vec2_rot(p->plr.dir, column * angle));
+		else
+			angled = vec2_norm(vec2_rot(p->plr.dir, column * angle));
+
+		t_line line = LINE(p->plr.pos.x * 10, p->plr.pos.y * 10, p->plr.pos.x * 10 + p->plr.dir.x * 10, p->plr.pos.y * 10 + p->plr.dir.y * 10);
+		ft_draw_line(p, line.start, line.end, 0xFF00);
+
 		wall = find_wall(p->map, p->plr.pos, angled);
-		printf("\t\t\t\t\t\t\t\twall x%f y%f\n", wall.x, wall.y);
+
+		if (column < 100 + WIN_WIDTH / 2.0)
+			printf("col %.0f | angle %f, col angle %f | vec2 x%f y%f   \twall x%f y%f\n",
+			column, angle, column * angle, angled.x, angled.y, wall.x, wall.y);
 
 		double magnitude = sqrt(wall.x * wall.x + wall.y * wall.y);
 		magnitude = ft_map(magnitude, RANGE(0, 8), RANGE(0, 1));
@@ -202,12 +227,12 @@ static void draw_view(t_program *p)
 			if (idk.x < 0)
 			{
 				if (fmod(column, 5))
-					ft_draw_wall(p, column, 1 - magnitude, 0x800000);
+					ft_draw_wall(p, column, 1 - magnitude, 0x80800000);
 				else
 					ft_draw_wall(p, column, 1 - magnitude, 0x0);
 			}
 			else if (fmod(column, 5))
-				ft_draw_wall(p, column, 1 - magnitude, 0xAA00AA);
+				ft_draw_wall(p, column, 1 - magnitude, 0x80AA00AA);
 			else
 				ft_draw_wall(p, column, 1 - magnitude, 0x0);
 		}
@@ -216,12 +241,12 @@ static void draw_view(t_program *p)
 			if (idk.y < 0)
 			{
 				if (fmod(column, 5))
-					ft_draw_wall(p, column, 1 - magnitude, 0x800000);
+					ft_draw_wall(p, column, 1 - magnitude, 0x80800000);
 				else
 					ft_draw_wall(p, column, 1 - magnitude, 0x0);
 			}
 			else if (fmod(column, 5))
-				ft_draw_wall(p, column, 1 - magnitude, 0x00AAAA);
+				ft_draw_wall(p, column, 1 - magnitude, 0x8000AAAA);
 			else
 				ft_draw_wall(p, column, 1 - magnitude, 0x0);
 		}
@@ -241,6 +266,7 @@ int mouse_key(int key, int x, int y, void *param)
 	ft_clear_buffer(&p->buffer);
 	// ft_draw_wall(p, 100, 50, 0xFFFF00);
 	draw_view(p);
+	printf("minimap\n\n");
 	draw_top_view(p, p->plr.pos, p->plr.dir);
 	mlx_put_image_to_window(p->mlx, p->win, p->buffer.ptr, 0, 0);
 	return (TRUE);
@@ -263,8 +289,8 @@ int main()
 		// p.plr.dir = VEC2(0.894427, 0.447214);
 		// p.plr.dir = VEC2(0.910366, 0.413803);
 		// p.plr.dir = VEC2(0, -1);
-		p.plr.dir = VEC2(0.707107, -0.707107);
-		// p.plr.dir = VEC2(-0.554700, 0.832050);
+		// p.plr.dir = VEC2(0, 1);
+		p.plr.dir = VEC2(-0.554700, 0.832050);
 	}
 
 	setup(&p, "test window");

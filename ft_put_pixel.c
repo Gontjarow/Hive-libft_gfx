@@ -6,7 +6,7 @@
 /*   By: ngontjar <ngontjar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/23 21:05:14 by ngontjar          #+#    #+#             */
-/*   Updated: 2020/01/24 17:36:22 by ngontjar         ###   ########.fr       */
+/*   Updated: 2020/02/03 22:34:24 by ngontjar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,13 @@
 int		ft_put_pixel(t_program *p, int x, int y, int color)
 {
 	int index;
+	int background;
 
 	index = (y * p->buffer.line_bytes + x);
 	if (index > 0 || index < WIN_WIDTH * WIN_HEIGHT)
 	{
-		p->buffer.data[index] = color;
+		background = p->buffer.data[index];
+		p->buffer.data[index] = blend_argb(color, background);
 		return (TRUE);
 	}
 	else
