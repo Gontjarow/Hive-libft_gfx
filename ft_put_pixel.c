@@ -6,7 +6,7 @@
 /*   By: ngontjar <ngontjar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/23 21:05:14 by ngontjar          #+#    #+#             */
-/*   Updated: 2020/02/03 22:34:24 by ngontjar         ###   ########.fr       */
+/*   Updated: 2020/02/04 14:42:36 by ngontjar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ int		ft_put_pixel(t_program *p, int x, int y, int color)
 	{
 		background = p->buffer.data[index];
 		p->buffer.data[index] = blend_argb(color, background);
+		// printf("wrote pixel %X to index %d\n", p->buffer.data[index], index);
 		return (TRUE);
 	}
 	else

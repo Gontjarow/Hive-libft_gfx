@@ -23,32 +23,40 @@ static void setup(t_program *p, char *title)
 	p->size.y = WIN_HEIGHT;
 }
 
-int mouse_move(int x, int y, void *param)
+static t_xy vec2_rot(t_xy v, double angle)
 {
-	t_program *p;
+	return ((t_xy){
+		v.x * cos(angle) - v.y * sin(angle),
+		v.x * sin(angle) + v.y * cos(angle)
+	});
+}
 
-	(void)x;
-	(void)y;
-	p = param;
-	ft_clear_buffer(&p->buffer);
-	// printf("\nmouse x%d y%d\n", x,y);
+static t_xy	vec2_norm(t_xy v)
+{
+	double mag;
 
-	// t_line test;
-	// test.start = VEC2(-10, -10);
-	// test.start = VEC2(WIN_WIDTH + 10, WIN_HEIGHT + 10);
-	// test.start = VEC2(WIN_WIDTH - x, WIN_HEIGHT - y);
-	// test.end = VEC2(x, y);
-	// if (ft_clip_line(&test))
-	// 	ft_draw_line(p, test.start, test.end, 0xFFFFFF);
+	mag = sqrt((v.x * v.x) + (v.y * v.y));
+	return ((t_xy){
+		v.x / mag,
+		v.y / mag
+	});
+}
 
-	// printf("line start x%.0f y%.0f | end x%.0f y%.0f\n",
-	// 	test.start.x, test.start.y, test.end.x, test.end.y);
-	printf("draw\n");
-	// ft_draw_wall(100, 100);
-	// ft_draw_line(p, VEC2(10, 10), VEC2(100, 100), 0x00FFFF);
-	// ft_draw_wall(p, 100, 100, 0xFFFF00);
-	// mlx_put_image_to_window(p->mlx, p->win, p->buffer.ptr, 0, 0);
-	return (TRUE);
+static t_xy vec2_mul(t_xy v, double scalar)
+{
+	return ((t_xy){
+		v.x * scalar,
+		v.y * scalar
+	});
+}
+
+static t_xy vec2_add(t_xy a, t_xy b)
+{
+	return((t_xy)
+	{
+		a.x + b.x,
+		a.y + b.y
+	});
 }
 
 static char	**parse_map(int fd)
@@ -142,26 +150,9 @@ static t_xy find_wall(char **map, t_xy pos, t_xy dir)
 	return (VEC2(los.end.x - pos.x, los.end.y - pos.y));
 }
 
-static t_xy vec2_rot(t_xy v, double angle)
-{
-	return ((t_xy){
-		v.x * cos(angle) - v.y * sin(angle),
-		v.x * sin(angle) + v.y * cos(angle)
-	});
-}
 
-static t_xy	vec2_norm(t_xy v)
-{
-	double mag;
 
-	mag = sqrt((v.x * v.x) + (v.y * v.y));
-	return ((t_xy){
-		v.x / mag,
-		v.y / mag
-	});
-}
-
-static void draw_top_view(t_program *p, t_xy pos, t_xy dir)
+void draw_top_view(t_program *p, t_xy pos, t_xy dir)
 {
 	int x, y;
 
@@ -191,7 +182,7 @@ static void draw_top_view(t_program *p, t_xy pos, t_xy dir)
 	ft_draw_line(p, line.start, line.end, 0xFFCC00);
 }
 
-static void draw_view(t_program *p)
+void draw_view(t_program *p)
 {
 	static double	angle = (45.0 / WIN_WIDTH) * DEG_TO_RAD;
 	t_xy			wall;
@@ -205,13 +196,10 @@ static void draw_view(t_program *p)
 	{
 		t_xy angled;
 
-		if (column < WIN_WIDTH / 2.0)
-			angled = vec2_norm(vec2_rot(p->plr.dir, column * angle));
-		else
-			angled = vec2_norm(vec2_rot(p->plr.dir, column * angle));
-
-		t_line line = LINE(p->plr.pos.x * 10, p->plr.pos.y * 10, p->plr.pos.x * 10 + p->plr.dir.x * 10, p->plr.pos.y * 10 + p->plr.dir.y * 10);
-		ft_draw_line(p, line.start, line.end, 0xFF00);
+		// if (column < WIN_WIDTH / 2.0)
+		// 	angled = vec2_norm(vec2_rot(p->plr.dir, column * angle));
+		// else
+		angled = vec2_norm(vec2_rot(p->plr.dir, column * angle));
 
 		wall = find_wall(p->map, p->plr.pos, angled);
 
@@ -250,6 +238,12 @@ static void draw_view(t_program *p)
 			else
 				ft_draw_wall(p, column, 1 - magnitude, 0x0);
 		}
+
+		t_xy vp = vec2_mul(p->plr.pos, 10);
+		t_xy vd = vec2_mul(vec2_add(p->plr.pos, wall), 10);
+		t_line line = LINE(vp.x, vp.y, vd.x, vd.y);
+		printf("start %f %f | end %f %f\n", line.start.x, line.start.y, line.end.x, line.end.y);
+		ft_draw_line(p, line.start, line.end, 0x88FF88);
 		++column;
 	}
 }
@@ -263,13 +257,31 @@ int mouse_key(int key, int x, int y, void *param)
 
 	p = param;
 	printf("mouse_key draw\n");
-	ft_clear_buffer(&p->buffer);
-	// ft_draw_wall(p, 100, 50, 0xFFFF00);
-	draw_view(p);
-	printf("minimap\n\n");
-	draw_top_view(p, p->plr.pos, p->plr.dir);
-	mlx_put_image_to_window(p->mlx, p->win, p->buffer.ptr, 0, 0);
+	render(p);
 	return (TRUE);
+}
+
+int mouse_move(int x, int y, void *param)
+{
+	t_program *p;
+
+	p = param;
+	p->mouse.d = VEC2(x - p->mouse.pos.x, y - p->mouse.pos.y);
+	p->mouse.pos = VEC2(x, y);
+
+	p->plr.dir = vec2_rot(p->plr.dir, p->mouse.d.x * DEG_TO_RAD);
+
+	render(p);
+	// printf("mouse move | pos %.0f %.0f | d %f %f\n", p->mouse.pos.x, p->mouse.pos.y, p->mouse.d.x, p->mouse.d.y);
+	// t_line debug;
+	// debug.start = VEC2(WIN_WIDTH * 0.5, WIN_HEIGHT * 0.5);
+	// debug.end = VEC2(x, y);
+	// t_clip clip = get_boundary(VEC2(0, 0), VEC2(WIN_WIDTH, WIN_HEIGHT));
+	// if (ft_clip_line(&debug, &clip))
+	// {
+	// 	printf("line %.0f %.0f -> %.0f %.0f\n", debug.start.x, debug.start.y, debug.end.x, debug.end.y);
+	// 	ft_draw_line(p, debug.start, debug.end, 0xABCDEF);
+	// }
 }
 
 int window_close(void *param)
@@ -291,12 +303,14 @@ int main()
 		// p.plr.dir = VEC2(0, -1);
 		// p.plr.dir = VEC2(0, 1);
 		p.plr.dir = VEC2(-0.554700, 0.832050);
+		p.mouse.pos = VEC2(0, 0);
+		p.mouse.d = VEC2(0, 0);
 	}
 
 	setup(&p, "test window");
 	printf("test done\n");
 	mlx_mouse_hook(p.win, &mouse_key, &p);
-	// mlx_hook(p.win, EVENT_MOUSE_MOVE, 0, &mouse_move, &p);
+	mlx_hook(p.win, EVENT_MOUSE_MOVE, 0, &mouse_move, &p);
 	mlx_hook(p.win, EVENT_CLOSE_WIN, 0, &window_close, &p);
 	mlx_loop(p.mlx);
 }

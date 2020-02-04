@@ -6,7 +6,7 @@
 /*   By: ngontjar <ngontjar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/17 14:07:46 by ngontjar          #+#    #+#             */
-/*   Updated: 2020/02/03 21:57:24 by ngontjar         ###   ########.fr       */
+/*   Updated: 2020/02/04 14:22:52 by ngontjar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,6 +105,12 @@ typedef struct	s_player
 	t_xy dir;
 }				t_player;
 
+typedef struct	s_mouse
+{
+	t_xy pos;
+	t_xy d;
+}				t_mouse;
+
 typedef struct	s_program
 {
 	void		*mlx;
@@ -112,6 +118,7 @@ typedef struct	s_program
 	t_xy		size;
 	t_image		buffer;
 	t_player	plr;
+	t_mouse		mouse;
 	char		**map;
 }				t_program;
 
@@ -164,6 +171,9 @@ int				ft_draw_wall(t_program *p, int x, double distance, int color);
 int				ft_draw_circle(t_program *p, t_circle *circle, int color);
 int				ft_draw_ring(t_program *p, t_circle *circle, int color);
 int				ft_draw_circle_full(t_program *p, t_circle *circle, int color);
+
+void			draw_top_view(t_program *p, t_xy pos, t_xy dir);
+void			draw_view(t_program *p);
 
 int				render(t_program *p);
 
