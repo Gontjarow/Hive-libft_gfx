@@ -6,7 +6,7 @@
 /*   By: ngontjar <ngontjar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/24 15:51:28 by ngontjar          #+#    #+#             */
-/*   Updated: 2020/01/28 16:25:57 by ngontjar         ###   ########.fr       */
+/*   Updated: 2020/02/04 21:52:51 by ngontjar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ int		ft_draw_wall(t_program *p, int x, double distance, int color)
 		return (FALSE);
 	// distance = ft_map(distance, RANGE(0, 100), RANGE(0, 1));
 	line = LINE(x, half + half * distance, x, half + half * -distance);
-	if (ft_clip_line(&line, &clip))
+	if (ft_clip_line(&line, clip))
 	{
 		// printf("clip works | start %.0f %.0f | end %.0f %.0f\n",
 		// 	line.start.x, line.start.y, line.end.x, line.end.y);

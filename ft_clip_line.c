@@ -6,7 +6,7 @@
 /*   By: ngontjar <ngontjar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/21 18:44:51 by ngontjar          #+#    #+#             */
-/*   Updated: 2020/01/28 15:06:51 by ngontjar         ###   ########.fr       */
+/*   Updated: 2020/02/04 21:50:56 by ngontjar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,10 +77,10 @@ static t_xy	new_point_hori(t_xy start, t_xy end, int outcode, t_clip *clip)
 static int	assign(t_xy *dest, t_xy point, t_clip *clip)
 {
 	*dest = point;
-	return (ft_get_region(point, clip));
+	return (ft_get_region(point, *clip));
 }
 
-int			ft_clip_line(t_line *line, t_clip *clip)
+int			ft_clip_line(t_line *line, t_clip clip)
 {
 	int		outcode_start;
 	int		outcode_end;
@@ -97,13 +97,13 @@ int			ft_clip_line(t_line *line, t_clip *clip)
 			break ;
 		outcode = (outcode_start ? outcode_start : outcode_end);
 		if (outcode & (OUTCODE_TOP | OUTCODE_BOTTOM))
-			point = new_point_vert(line->start, line->end, outcode, clip);
+			point = new_point_vert(line->start, line->end, outcode, &clip);
 		else if (outcode & (OUTCODE_LEFT | OUTCODE_RIGHT))
-			point = new_point_hori(line->start, line->end, outcode, clip);
+			point = new_point_hori(line->start, line->end, outcode, &clip);
 		if (outcode == outcode_start)
-			outcode_start = assign(&line->start, point, clip);
+			outcode_start = assign(&line->start, point, &clip);
 		else
-			outcode_end = assign(&line->end, point, clip);
+			outcode_end = assign(&line->end, point, &clip);
 	}
 	return (!(outcode_start | outcode_end));
 }

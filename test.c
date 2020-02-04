@@ -25,51 +25,6 @@ static void setup(t_program *p, char *title)
 	p->mouse.d = VEC2(0, 0);
 }
 
-static t_xy vec2_rot(t_xy v, double angle)
-{
-	return ((t_xy){
-		v.x * cos(angle) - v.y * sin(angle),
-		v.x * sin(angle) + v.y * cos(angle)
-	});
-}
-
-static t_xy	vec2_norm(t_xy v)
-{
-	double mag;
-
-	mag = sqrt((v.x * v.x) + (v.y * v.y));
-	return ((t_xy){
-		v.x / mag,
-		v.y / mag
-	});
-}
-
-static t_xy vec2_mul(t_xy v, double scalar)
-{
-	return ((t_xy){
-		v.x * scalar,
-		v.y * scalar
-	});
-}
-
-static t_xy vec2_add(t_xy a, t_xy b)
-{
-	return((t_xy)
-	{
-		a.x + b.x,
-		a.y + b.y
-	});
-}
-
-static t_xy vec2_dec(t_xy a, t_xy b)
-{
-	return((t_xy)
-	{
-		a.x - b.x,
-		a.y - b.y
-	});
-}
-
 static char	**parse_map(int fd)
 {
 	char	**map;
@@ -118,11 +73,67 @@ static t_clip get_boundary(t_xy corner1, t_xy corner2)
 	return (out);
 }
 
-static t_xy find_wall(char **map, t_xy pos, t_xy dir)
-{
-	t_xy	length;
-	t_xy	ratio;
+/*
+** To cut the line exactly where the line intersects a wall
+** could be done in many ways, most simply by calculating
+** each grid index intersection...
+** https://www.permadi.com/tutorial/raycast/rayc7.html
+**
+** But that's no fun. The main idea I'm trying to get working is
+** using ft_clip_line and a bounding box around the player and
+** the truncated index. Having trouble getting that to work...
+*/
 
+static t_xy find_wall(t_program *p, t_xy pos, t_xy dir)
+{
+	t_xy end = VEC2(pos.x + dir.x, pos.y + dir.y);
+	t_xy spot = pos;
+
+	while (p->map[(int)spot.y][(int)spot.x] == ' ')
+	{
+		spot.x += dir.x;
+		spot.y += dir.y;
+	}
+
+	double hbound = (dir.x >= 0 ? floor(spot.x) : ceil(spot.x));
+	double vbound = (dir.y >= 0 ? floor(spot.y) : ceil(spot.y));
+	ft_put_pixel(p, hbound * 10, vbound * 10, 0xFF0000);
+
+	t_line los = LINE(pos.x, pos.y, spot.x, spot.y);
+	t_clip clip;
+	t_xy norm = vec2_norm(spot);
+
+	clip = CLIP(0, 0, WIN_WIDTH, WIN_HEIGHT);
+	// top-right bottom-left
+	// if (norm.x > norm.y && spot.x > pos.x)
+	// {
+	// 	clip = get_boundary(pos, VEC2(hbound, 0));
+	// 	int region = ft_get_region(spot, clip);
+	// 	printf("outcodes: %d\n", region);
+	// 	ft_draw_line(p, vec2_mul(pos, 10), vec2_mul(spot, 10), 0x80C70039);
+
+	// 	if (region & OUTCODE_RIGHT && !(region & (OUTCODE_TOP|OUTCODE_BOTTOM)))
+	// 	{
+	// 		spot.x = hbound;
+	// 		printf("left\n");
+	// 		ft_draw_line(p, vec2_mul(pos, 10), vec2_mul(spot, 10), 0x00FFF7);
+	// 	}
+	// }
+	// else if (spot.x > spot.y && spot.x < pos.x)
+	// 	clip = get_boundary(pos, VEC2(hbound, WIN_HEIGHT));
+	// bottom-right top-left
+	// else if (spot.y > spot.x && spot.x > pos.x)
+	// 	clip = get_boundary(pos, VEC2(WIN_WIDTH, vbound));
+	// else
+	// 	clip = get_boundary(pos, VEC2(0, vbound));
+	ft_clip_line(&los, clip);
+
+	// return (VEC2(spot.x - pos.x, spot.y - pos.y));
+	return (VEC2(los.end.x - pos.x, los.end.y - pos.y));
+}
+
+static t_xy find_wall_old(char **map, t_xy pos, t_xy dir)
+{
 	t_xy end = VEC2(pos.x + dir.x, pos.y + dir.y);
 
 	t_xy spot = pos;
@@ -147,7 +158,7 @@ static t_xy find_wall(char **map, t_xy pos, t_xy dir)
 	// printf("\nstart : %f %f\tend : %f %f \tindex : %d %d\nclip :\t%f\n%f\t%f\n\t%f\n",
 	// 	pos.x, pos.y, spot.x, spot.y, (int)spot.x, (int)spot.y,
 	// 	clip.top, clip.left, clip.right, clip.bottom);
-	ft_clip_line(&los, &clip);
+	ft_clip_line(&los, clip);
 	// printf("\n");
 	// printf("dir.x %f, dir.y%f\n", dir.x, dir.y);
 	// printf("clip mask: \n\t%f \n%f\t%f \n\t%f\n",
@@ -160,8 +171,6 @@ static t_xy find_wall(char **map, t_xy pos, t_xy dir)
 
 	return (VEC2(spot.x - pos.x, spot.y - pos.y));
 }
-
-
 
 void draw_top_view(t_program *p, t_xy pos, t_xy dir)
 {
@@ -186,16 +195,17 @@ void draw_top_view(t_program *p, t_xy pos, t_xy dir)
 	dir.x *= 20;
 	dir.y *= 20;
 	t_circle ring = CIRCLE(pos, 3);
-	t_line line = LINE(pos.x, pos.y, pos.x + dir.x, pos.y + dir.y);
-	printf("\nring\n");
+	t_line visdir = LINE(pos.x, pos.y, pos.x + dir.x, pos.y + dir.y);
+	// printf("\nring\n");
 	ft_draw_ring(p, &ring, 0xFF0000);
-	printf("\nline\n");
-	ft_draw_line(p, line.start, line.end, 0xFFCC00);
+	// printf("\nline\n");
+	ft_draw_line(p, visdir.start, visdir.end, 0xFFCC00);
 }
 
 void draw_view(t_program *p)
 {
 	static double	angle = (90.0 / WIN_WIDTH) * DEG_TO_RAD;
+	static double	half = (90.0 / 2.0 * DEG_TO_RAD);
 	t_xy			wall;
 	double			column;
 
@@ -204,18 +214,15 @@ void draw_view(t_program *p)
 	{
 		t_xy angled;
 
-		// if (column < WIN_WIDTH / 2.0)
-		// 	angled = vec2_norm(vec2_rot(p->plr.dir, column * angle));
-		// else
-		angled = vec2_norm(vec2_rot(p->plr.dir, column * angle));
-
-		wall = find_wall(p->map, p->plr.pos, angled);
+		angled = vec2_rot(p->plr.dir, column * angle - half);
+		wall = find_wall(p, p->plr.pos, angled);
 
 		// if (column < 100 + WIN_WIDTH / 2.0)
 		// 	printf("col %.0f | angle %f, col angle %f | vec2 x%f y%f   \twall x%f y%f\n", column, angle, column * angle, angled.x, angled.y, wall.x, wall.y);
 
 		double magnitude = sqrt(wall.x * wall.x + wall.y * wall.y);
-		magnitude = ft_map(magnitude, RANGE(0, 8), RANGE(0, 1));
+		magnitude = ft_clamp(magnitude, 0, 10);
+		magnitude = ft_map(magnitude, RANGE(0, 10), RANGE(0, 1));
 
 		if (fmod(column, 5))
 			ft_draw_wall(p, column, 1 - magnitude, 0xABCDEF);
@@ -225,7 +232,7 @@ void draw_view(t_program *p)
 		t_xy vp = vec2_mul(p->plr.pos, 10);
 		t_xy vd = vec2_mul(vec2_add(p->plr.pos, wall), 10);
 		t_line line = LINE(vp.x, vp.y, vd.x, vd.y);
-		ft_draw_line(p, line.start, line.end, 0x88FF88);
+		ft_draw_line(p, line.start, line.end, 0xF088FF88);
 		// printf("start %f %f | end %f %f\n", line.start.x, line.start.y, line.end.x, line.end.y);
 		++column;
 	}
@@ -309,7 +316,7 @@ int main()
 		// p.plr.dir = VEC2(0.910366, 0.413803);
 		// p.plr.dir = VEC2(0, -1);
 		// p.plr.dir = VEC2(0, 1);
-		p.plr.dir = VEC2(-0.554700, 0.832050);
+		p.plr.dir = vec2_norm(VEC2(0.005, 0));
 
 	}
 

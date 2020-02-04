@@ -6,7 +6,7 @@
 /*   By: ngontjar <ngontjar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/17 14:07:46 by ngontjar          #+#    #+#             */
-/*   Updated: 2020/02/04 16:44:32 by ngontjar         ###   ########.fr       */
+/*   Updated: 2020/02/04 21:49:56 by ngontjar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,8 +167,9 @@ int				ft_argb_to_int(double a, double r, double g, double b);
 
 int				ft_clear_buffer(t_image *image);
 
-int				ft_get_region(t_xy point, t_clip *clip);
-int				ft_clip_line(t_line *line, t_clip *clip);
+int				ft_get_region(t_xy point, t_clip clip);
+int				ft_clip_line(t_line *line, t_clip clip);
+t_xy			intersect_line(t_program *p, t_line wall);
 
 int				ft_put_pixel(t_program *p, int x, int y, int color);
 int				ft_draw_line(t_program *p, t_xy start, t_xy end, int color);
@@ -180,6 +181,12 @@ int				ft_draw_circle_full(t_program *p, t_circle *circle, int color);
 
 void			draw_top_view(t_program *p, t_xy pos, t_xy dir);
 void			draw_view(t_program *p);
+
+t_xy			vec2_rot(t_xy v, double angle);
+t_xy			vec2_norm(t_xy v);
+t_xy			vec2_mul(t_xy v, double scalar);
+t_xy			vec2_add(t_xy a, t_xy b);
+t_xy			vec2_dec(t_xy a, t_xy b);
 
 int				render(t_program *p);
 
