@@ -6,7 +6,7 @@
 /*   By: ngontjar <ngontjar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/17 14:07:46 by ngontjar          #+#    #+#             */
-/*   Updated: 2020/02/04 14:22:52 by ngontjar         ###   ########.fr       */
+/*   Updated: 2020/02/04 16:44:32 by ngontjar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,16 +35,14 @@
 
 # define DEG_TO_RAD (0.01745329251994329576923690768488612)
 
-# define VEC3(x,y,z) (t_xyz){x, y, z}
 # define VEC2(x,y) (t_xy){x, y}
+# define VEC3(x,y,z) (t_xyz){x, y, z}
 # define RANGE(start,end) (t_range){start, end}
 # define LINE(Ax,Ay,Bx,By) (t_line){VEC2(Ax, Ay), VEC2(Bx, By)}
 # define CLIP(top,left,right,bottom) (t_clip){top,left,right,bottom}
 # define CIRCLE(pos,r) (t_circle){pos, r}
 # define ARGB(a,r,g,b) ((t_argb){a, r, g, b})
-
-# define CHAR(a,n) (((a) << (n)) & 0xFF)
-# define COLOR(a,r,g,b) (CHAR(a,24) | CHAR(r,16) | CHAR(g,8) | b)
+# define COLOR(AA,RR,GG,BB) ((AA) << 24 | (RR) << 16 | (GG) << 8 | (BB))
 
 typedef struct	s_xyz
 {
@@ -129,6 +127,14 @@ typedef struct	t_argb
 	unsigned char g;
 	unsigned char b;
 }				t_argb;
+
+enum			e_key
+{
+	W = 13,
+	A = 0,
+	S = 1,
+	D = 2
+};
 
 enum			e_color
 {

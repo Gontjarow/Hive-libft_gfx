@@ -21,6 +21,8 @@ static void setup(t_program *p, char *title)
 	p->buffer.line_bytes /= 4;
 	p->size.x = WIN_WIDTH;
 	p->size.y = WIN_HEIGHT;
+	p->mouse.pos = VEC2(0, 0);
+	p->mouse.d = VEC2(0, 0);
 }
 
 static t_xy vec2_rot(t_xy v, double angle)
@@ -56,6 +58,15 @@ static t_xy vec2_add(t_xy a, t_xy b)
 	{
 		a.x + b.x,
 		a.y + b.y
+	});
+}
+
+static t_xy vec2_dec(t_xy a, t_xy b)
+{
+	return((t_xy)
+	{
+		a.x - b.x,
+		a.y - b.y
 	});
 }
 
@@ -147,7 +158,7 @@ static t_xy find_wall(char **map, t_xy pos, t_xy dir)
 	// printf("\t\t\t\t\t\t\t\treturning <%f %f>\n",
 	// 	los.end.x - pos.x, los.end.y - pos.y);
 
-	return (VEC2(los.end.x - pos.x, los.end.y - pos.y));
+	return (VEC2(spot.x - pos.x, spot.y - pos.y));
 }
 
 
@@ -184,12 +195,9 @@ void draw_top_view(t_program *p, t_xy pos, t_xy dir)
 
 void draw_view(t_program *p)
 {
-	static double	angle = (45.0 / WIN_WIDTH) * DEG_TO_RAD;
+	static double	angle = (90.0 / WIN_WIDTH) * DEG_TO_RAD;
 	t_xy			wall;
 	double			column;
-	t_xy			idk;
-
-	printf("draw_view x%f y%f\n", idk.x, idk.y);
 
 	column = 0;
 	while (column < WIN_WIDTH)
@@ -203,47 +211,22 @@ void draw_view(t_program *p)
 
 		wall = find_wall(p->map, p->plr.pos, angled);
 
-		if (column < 100 + WIN_WIDTH / 2.0)
-			printf("col %.0f | angle %f, col angle %f | vec2 x%f y%f   \twall x%f y%f\n",
-			column, angle, column * angle, angled.x, angled.y, wall.x, wall.y);
+		// if (column < 100 + WIN_WIDTH / 2.0)
+		// 	printf("col %.0f | angle %f, col angle %f | vec2 x%f y%f   \twall x%f y%f\n", column, angle, column * angle, angled.x, angled.y, wall.x, wall.y);
 
 		double magnitude = sqrt(wall.x * wall.x + wall.y * wall.y);
 		magnitude = ft_map(magnitude, RANGE(0, 8), RANGE(0, 1));
 
-		if (column < WIN_WIDTH / 2)
-		{
-			if (idk.x < 0)
-			{
-				if (fmod(column, 5))
-					ft_draw_wall(p, column, 1 - magnitude, 0x80800000);
-				else
-					ft_draw_wall(p, column, 1 - magnitude, 0x0);
-			}
-			else if (fmod(column, 5))
-				ft_draw_wall(p, column, 1 - magnitude, 0x80AA00AA);
-			else
-				ft_draw_wall(p, column, 1 - magnitude, 0x0);
-		}
+		if (fmod(column, 5))
+			ft_draw_wall(p, column, 1 - magnitude, 0xABCDEF);
 		else
-		{
-			if (idk.y < 0)
-			{
-				if (fmod(column, 5))
-					ft_draw_wall(p, column, 1 - magnitude, 0x80800000);
-				else
-					ft_draw_wall(p, column, 1 - magnitude, 0x0);
-			}
-			else if (fmod(column, 5))
-				ft_draw_wall(p, column, 1 - magnitude, 0x8000AAAA);
-			else
-				ft_draw_wall(p, column, 1 - magnitude, 0x0);
-		}
+			ft_draw_wall(p, column, 1 - magnitude, 0x0);
 
 		t_xy vp = vec2_mul(p->plr.pos, 10);
 		t_xy vd = vec2_mul(vec2_add(p->plr.pos, wall), 10);
 		t_line line = LINE(vp.x, vp.y, vd.x, vd.y);
-		printf("start %f %f | end %f %f\n", line.start.x, line.start.y, line.end.x, line.end.y);
 		ft_draw_line(p, line.start, line.end, 0x88FF88);
+		// printf("start %f %f | end %f %f\n", line.start.x, line.start.y, line.end.x, line.end.y);
 		++column;
 	}
 }
@@ -284,6 +267,30 @@ int mouse_move(int x, int y, void *param)
 	// }
 }
 
+int keyboard(int keycode,void *param)
+{
+	t_program *p;
+	t_xy direction;
+
+	p = param;
+	printf("keycode = %d\n", keycode);
+	if (keycode == W)
+		p->plr.pos = vec2_add(p->plr.pos, p->plr.dir);
+	else if (keycode == S)
+		p->plr.pos = vec2_dec(p->plr.pos, p->plr.dir);
+	else if (keycode == A)
+	{
+		direction = vec2_rot(p->plr.dir, 90.0 * DEG_TO_RAD);
+		p->plr.pos = vec2_dec(p->plr.pos, direction);
+	}
+	else if (keycode == D)
+	{
+		direction = vec2_rot(p->plr.dir, 90.0 * DEG_TO_RAD);
+		p->plr.pos = vec2_add(p->plr.pos, direction);
+	}
+	render(p);
+}
+
 int window_close(void *param)
 {
 	(void)param;
@@ -303,8 +310,7 @@ int main()
 		// p.plr.dir = VEC2(0, -1);
 		// p.plr.dir = VEC2(0, 1);
 		p.plr.dir = VEC2(-0.554700, 0.832050);
-		p.mouse.pos = VEC2(0, 0);
-		p.mouse.d = VEC2(0, 0);
+
 	}
 
 	setup(&p, "test window");
@@ -312,5 +318,6 @@ int main()
 	mlx_mouse_hook(p.win, &mouse_key, &p);
 	mlx_hook(p.win, EVENT_MOUSE_MOVE, 0, &mouse_move, &p);
 	mlx_hook(p.win, EVENT_CLOSE_WIN, 0, &window_close, &p);
+	mlx_key_hook(p.win, &keyboard, &p);
 	mlx_loop(p.mlx);
 }
