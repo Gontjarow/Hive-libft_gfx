@@ -95,37 +95,40 @@ static t_xy find_wall(t_program *p, t_xy pos, t_xy dir)
 		spot.y += dir.y;
 	}
 
-	double hbound = (dir.x >= 0 ? floor(spot.x) : ceil(spot.x));
-	double vbound = (dir.y >= 0 ? floor(spot.y) : ceil(spot.y));
-	ft_put_pixel(p, hbound * 10, vbound * 10, 0xFF0000);
+	double xbound = (dir.x > 0 ? ceil(spot.x) : floor(spot.x));
+	xbound = (xbound == 0 ? 1 : xbound);
+	double ybound = (dir.y > 0 ? ceil(spot.y) : floor(spot.y));
+	ybound = (ybound == 0 ? 1 : ybound);
+	ft_put_pixel(p, xbound * 10, ybound * 10, 0xFF0000);
 
 	t_line los = LINE(pos.x, pos.y, spot.x, spot.y);
 	t_clip clip;
 	t_xy norm = vec2_norm(spot);
 
 	clip = CLIP(0, 0, WIN_WIDTH, WIN_HEIGHT);
+	clip = get_boundary(pos, VEC2(xbound, ybound));
 	// top-right bottom-left
 	// if (norm.x > norm.y && spot.x > pos.x)
 	// {
-	// 	clip = get_boundary(pos, VEC2(hbound, 0));
+	// 	clip = get_boundary(pos, VEC2(xbound, 0));
 	// 	int region = ft_get_region(spot, clip);
 	// 	printf("outcodes: %d\n", region);
 	// 	ft_draw_line(p, vec2_mul(pos, 10), vec2_mul(spot, 10), 0x80C70039);
 
 	// 	if (region & OUTCODE_RIGHT && !(region & (OUTCODE_TOP|OUTCODE_BOTTOM)))
 	// 	{
-	// 		spot.x = hbound;
+	// 		spot.x = xbound;
 	// 		printf("left\n");
 	// 		ft_draw_line(p, vec2_mul(pos, 10), vec2_mul(spot, 10), 0x00FFF7);
 	// 	}
 	// }
 	// else if (spot.x > spot.y && spot.x < pos.x)
-	// 	clip = get_boundary(pos, VEC2(hbound, WIN_HEIGHT));
+	// 	clip = get_boundary(pos, VEC2(xbound, WIN_HEIGHT));
 	// bottom-right top-left
 	// else if (spot.y > spot.x && spot.x > pos.x)
-	// 	clip = get_boundary(pos, VEC2(WIN_WIDTH, vbound));
+	// 	clip = get_boundary(pos, VEC2(WIN_WIDTH, ybound));
 	// else
-	// 	clip = get_boundary(pos, VEC2(0, vbound));
+	// 	clip = get_boundary(pos, VEC2(0, ybound));
 	ft_clip_line(&los, clip);
 
 	// return (VEC2(spot.x - pos.x, spot.y - pos.y));
@@ -209,12 +212,14 @@ void draw_view(t_program *p)
 	t_xy			wall;
 	double			column;
 
+	printf("plr dir %f %f\n", p->plr.dir.x, p->plr.dir.y);
 	column = 0;
 	while (column < WIN_WIDTH)
 	{
 		t_xy angled;
 
-		angled = vec2_rot(p->plr.dir, column * angle - half);
+		// angled = vec2_rot(p->plr.dir, column * angle - half);
+		angled = p->plr.dir;
 		wall = find_wall(p, p->plr.pos, angled);
 
 		// if (column < 100 + WIN_WIDTH / 2.0)
@@ -316,7 +321,7 @@ int main()
 		// p.plr.dir = VEC2(0.910366, 0.413803);
 		// p.plr.dir = VEC2(0, -1);
 		// p.plr.dir = VEC2(0, 1);
-		p.plr.dir = vec2_norm(VEC2(0.005, 0));
+		p.plr.dir = vec2_norm(VEC2(1, 0));
 
 	}
 
