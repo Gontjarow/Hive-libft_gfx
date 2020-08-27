@@ -1,6 +1,6 @@
 NAME = libft_gfx
 
-SOURCES = test.c ft_put_pixel.c ft_draw_line.c ft_draw_circle.c ft_draw_wall.c ft_draw_box.c ft_rgb_to_int.c ft_clear_buffer.c ft_get_region.c ft_clip_line.c ft_clamp.c ft_map.c ft_die.c blend_color.c render.c vec2.c
+SOURCES = input.c test.c ft_put_pixel.c ft_draw_line.c ft_draw_circle.c ft_draw_wall.c ft_draw_box.c ft_rgb_to_int.c ft_clear_buffer.c ft_get_region.c ft_clip_line.c ft_clamp.c ft_map.c ft_die.c blend_color.c render.c vec2.c ft_init_image.c
 
 OBJECTS = $(subst .c,.o,$(SOURCES))
 
@@ -10,6 +10,7 @@ FLAGS = -Wall -Wextra #-Werror
 LINKS = -I libft -L libft \
 	-I /usr/local/include -L /usr/local/lib \
 	-l mlx -l ft -framework OpenGL -framework Appkit
+	#-l mlx -l ft -lm -lX11 -lXext #-framework OpenGL -framework Appkit
 
 MSG = \033[38;5;214m
 END = \033[0m

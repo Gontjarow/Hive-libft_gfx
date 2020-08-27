@@ -6,7 +6,7 @@
 #    By: ngontjar <ngontjar@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/10/16 13:15:52 by ngontjar          #+#    #+#              #
-#    Updated: 2020/01/17 20:19:02 by ngontjar         ###   ########.fr        #
+#    Updated: 2020/02/08 04:20:07 by ngontjar         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -31,7 +31,7 @@ TESTBIN = ./test/bin
 MSG = \033[38;5;214m
 END = \033[0m
 
-FLAGS = -Wall -Wextra -Werror
+FLAGS = -Wall -Wextra #-Werror
 
 .PHONY: re fclean all objects test
 

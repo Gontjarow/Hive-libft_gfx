@@ -15,10 +15,10 @@ static void setup(t_program *p, char *title)
 	if (NULL == (p->buffer.ptr = mlx_new_image(p->mlx, WIN_WIDTH, WIN_HEIGHT)))
 		ft_die("MLX failed to allocate image buffer.");
 	p->buffer.data = (int *)mlx_get_data_addr(p->buffer.ptr,
-		&p->buffer.pixel_bits,
-		&p->buffer.line_bytes,
+		&p->buffer.bpp,
+		&p->buffer.width,
 		&p->buffer.endian);
-	p->buffer.line_bytes /= 4;
+	p->buffer.width /= 4;
 	p->size.x = WIN_WIDTH;
 	p->size.y = WIN_HEIGHT;
 	p->mouse.pos = VEC2(0, 0);
@@ -241,66 +241,6 @@ void draw_view(t_program *p)
 		// printf("start %f %f | end %f %f\n", line.start.x, line.start.y, line.end.x, line.end.y);
 		++column;
 	}
-}
-
-int mouse_key(int key, int x, int y, void *param)
-{
-	t_program *p;
-	(void)key;
-	(void)x;
-	(void)y;
-
-	p = param;
-	printf("mouse_key draw\n");
-	render(p);
-	return (TRUE);
-}
-
-int mouse_move(int x, int y, void *param)
-{
-	t_program *p;
-
-	p = param;
-	p->mouse.d = VEC2(x - p->mouse.pos.x, y - p->mouse.pos.y);
-	p->mouse.pos = VEC2(x, y);
-
-	p->plr.dir = vec2_rot(p->plr.dir, p->mouse.d.x * DEG_TO_RAD);
-
-	render(p);
-	// printf("mouse move | pos %.0f %.0f | d %f %f\n", p->mouse.pos.x, p->mouse.pos.y, p->mouse.d.x, p->mouse.d.y);
-	// t_line debug;
-	// debug.start = VEC2(WIN_WIDTH * 0.5, WIN_HEIGHT * 0.5);
-	// debug.end = VEC2(x, y);
-	// t_clip clip = get_boundary(VEC2(0, 0), VEC2(WIN_WIDTH, WIN_HEIGHT));
-	// if (ft_clip_line(&debug, &clip))
-	// {
-	// 	printf("line %.0f %.0f -> %.0f %.0f\n", debug.start.x, debug.start.y, debug.end.x, debug.end.y);
-	// 	ft_draw_line(p, debug.start, debug.end, 0xABCDEF);
-	// }
-}
-
-int keyboard(int keycode,void *param)
-{
-	t_program *p;
-	t_xy direction;
-
-	p = param;
-	printf("keycode = %d\n", keycode);
-	if (keycode == W)
-		p->plr.pos = vec2_add(p->plr.pos, p->plr.dir);
-	else if (keycode == S)
-		p->plr.pos = vec2_dec(p->plr.pos, p->plr.dir);
-	else if (keycode == A)
-	{
-		direction = vec2_rot(p->plr.dir, 90.0 * DEG_TO_RAD);
-		p->plr.pos = vec2_dec(p->plr.pos, direction);
-	}
-	else if (keycode == D)
-	{
-		direction = vec2_rot(p->plr.dir, 90.0 * DEG_TO_RAD);
-		p->plr.pos = vec2_add(p->plr.pos, direction);
-	}
-	render(p);
 }
 
 int window_close(void *param)

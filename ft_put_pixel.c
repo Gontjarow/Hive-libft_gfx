@@ -6,7 +6,7 @@
 /*   By: ngontjar <ngontjar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/23 21:05:14 by ngontjar          #+#    #+#             */
-/*   Updated: 2020/02/04 14:42:36 by ngontjar         ###   ########.fr       */
+/*   Updated: 2020/08/27 03:27:34 by ngontjar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ int		ft_put_pixel(t_program *p, int x, int y, int color)
 	int index;
 	int background;
 
-	index = (y * p->buffer.line_bytes + x);
+	index = (y * p->buffer.width + x);
 	if (index > 0 || index < WIN_WIDTH * WIN_HEIGHT)
 	{
 		background = p->buffer.data[index];
